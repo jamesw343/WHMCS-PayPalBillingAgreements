@@ -56,7 +56,7 @@ switch ($action) {
             ->addPair('PAYMENTREQUEST_0_AMT', 0)
             ->addPair('PAYMENTREQUEST_0_CURRENCYCODE', 'USD')
             ->addPair('L_BILLINGTYPE0', 'MerchantInitiatedBilling')
-            ->addPair('L_BILLINGAGREEMENTDESCRIPTION0', 'Nexril.net Billing Agreement')
+            ->addPair('L_BILLINGAGREEMENTDESCRIPTION0', $whmcs->get_config('CompanyName') . ' Billing Agreement')
             ->addPair('cancelUrl', $whmcs->get_config('SystemURL') . '/paypalbilling.php?action=returnfailed')
             ->addPair('returnUrl', $whmcs->get_config('SystemURL') . '/paypalbilling.php?action=returnsuccess' . $returnSuccessInvoiceId)
             ->execute('SetExpressCheckout');
