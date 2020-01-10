@@ -21,7 +21,8 @@ CREATE TABLE `paypal_billingagreement` (
     `client_id` int(10) NOT NULL,
     `status` varchar(32) NOT NULL,
     `created_at` int(10) NOT NULL,
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`client_id`) REFERENCES `tblclients` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 ```
 4. Activate the module in WHMCS Admin => Payment Gateways
