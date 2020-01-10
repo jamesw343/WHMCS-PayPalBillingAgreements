@@ -17,11 +17,11 @@ For this addon to work correctly, you **must** have PayPal reference transaction
 3. Run the following SQL statement to create the billing agreement table in your WHMCS database:
 ```sql
 CREATE TABLE `paypal_billingagreement` (
-		`id` varchar(32) NOT NULL,
-		`client_id` int(10) NOT NULL,
-		`status` varchar(32) NOT NULL,
-		`created_at` int(10) NOT NULL,
-		PRIMARY KEY (`id`)
+    `id` varchar(32) NOT NULL,
+    `client_id` int(10) NOT NULL,
+    `status` varchar(32) NOT NULL,
+    `created_at` int(10) NOT NULL,
+    PRIMARY KEY (`id`)
 );
 ```
 4. Activate the module in WHMCS Admin => Payment Gateways
