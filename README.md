@@ -4,7 +4,7 @@
 - Automatically charge users the correct invoice amounts, eliminating accidental overpayments or missed/late payments
 - Only attempts to automatically charge invoices with the payment method as "PayPal Billing Agreements"
 - Customers can make one-time payments from the client area without being redirected to PayPal and back (after successfuly setting up a billing agreement)
-- Honors the "Process Days Before Due" automation setting for when to charge a customer's PayPal account
+- Honors the "Process Days Before Due" and "Retry Every Week For" automation setting for when to charge a customer's PayPal account
 - Honors the "Auto CC Processing" setting for individual customers
 - Displays whether a customer has an active billing agreement or not in the admin area
 
@@ -34,6 +34,7 @@ CREATE TABLE `paypal_billingagreement` (
 - Currently designed to make auto-payments on a separate cron job. It's best to run this cron job at a separate time from your normal WHMCS daily cron to avoid conflicts.
 - Does not support e-checks (or rather, the addon will mark the invoice as PAID instantly regardless of whether the e-check clears). Recommended to disable accepting e-checks on your PayPal account to avoid this.
 - Does not currently email a user when a PayPal billing agreement charge attempt fails
+- Does not have support for shipping addresses when submitting a payment, making you ineligible for PayPal seller protection
 - If you do not setup the IPN, the addon will not know if a user cancels his/her billing agreement from PayPal
 - No auto-installation
 - No ability to manage a customer's billing agreement settings through the admin area
