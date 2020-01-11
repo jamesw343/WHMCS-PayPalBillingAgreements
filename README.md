@@ -27,7 +27,7 @@ CREATE TABLE `paypal_billingagreement` (
 ```
 4. Activate the module in WHMCS Admin => Payment Gateways
 5. Enter your PayPal API Username, Password, and Signature in WHMCS Admin => Payment Gateways => PayPal Billing Agreement
-6. Set your IPN URL to https://your.site/modules/gateways/callback/paypalbilling.php
+6. *(Optional)* Set your IPN URL to https://your.site/modules/gateways/callback/paypalbilling.php
 7. Run a cron job at 11:00 PM every night:
 `0 23 * * php -q /path/to/whmcs/modules/gateways/paypalbilling/cron.php`
 
