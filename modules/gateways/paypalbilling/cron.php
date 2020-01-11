@@ -1,5 +1,10 @@
 <?php
 
+if (php_sapi_name() !== 'cli') {
+    header('HTTP/1.1 403 Forbidden');
+    die();
+}
+
 use WHMCS\Database\Capsule;
 
 require_once __DIR__ . '/../../../init.php';
@@ -7,11 +12,6 @@ require_once __DIR__ . '/../../../includes/functions.php';
 require_once __DIR__ . '/../../../includes/gatewayfunctions.php';
 require_once __DIR__ . '/../../../includes/invoicefunctions.php';
 require_once __DIR__ . '/PayPalNVP.php';
-
-if (php_sapi_name() !== 'cli') {
-    header('HTTP/1.1 403 Forbidden');
-    die();
-}
 
 $whmcs = DI::make('app');
 
