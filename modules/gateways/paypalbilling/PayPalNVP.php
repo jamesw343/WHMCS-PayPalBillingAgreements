@@ -5,16 +5,20 @@ use WHMCS\Database\Capsule;
 class PayPalNVP
 {
 
-    private $apiEndpoint = 'https://api-3t.paypal.com/nvp';
+    private static $apiEndpoint = 'https://api-3t.paypal.com/nvp';
 
-    private $apiUsername = '';
-    private $apiPassword = '';
-    private $apiSignature = '';
+    private static $apiUsername = '';
+    private static $apiPassword = '';
+    private static $apiSignature = '';
 
     private $data = [];
 
     public function __construct()
     {
+        if (self::$apiUsername && self::$apiPassword && self::$apiSignature) {
+            return;
+        }
+
         $credentials = Capsule::table('tblpaymentgateways')
             ->where('gateway', '=', 'paypalbilling')
             ->whereIn('setting', ['apiUsername', 'apiPassword', 'apiSignature'])
@@ -23,7 +27,7 @@ class PayPalNVP
         foreach ($credentials as $credential) {
             $setting = $credential->setting;
 
-            $this->$setting = $credential->value;
+            self::$$setting = $credential->value;
         }
     }
 
@@ -36,13 +40,13 @@ class PayPalNVP
 
     public function execute($method)
     {
-        $this->addPair('USER', $this->apiUsername)
-            ->addPair('PWD', $this->apiPassword)
-            ->addPair('SIGNATURE', $this->apiSignature)
+        $this->addPair('USER', self::$apiUsername)
+            ->addPair('PWD', self::$apiPassword)
+            ->addPair('SIGNATURE', self::$apiSignature)
             ->addPair('METHOD', $method)
             ->addPair('VERSION', '95');
 
-        $ch = curl_init($this->apiEndpoint);
+        $ch = curl_init(self::$apiEndpoint);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_SSL_VERIFYHOST => 2,
