@@ -27,17 +27,22 @@ function paypalbilling_config()
         'apiUsername' => [
             'FriendlyName' => 'API User',
             'Type' => 'text',
-            'Size' => 128
+            'Size' => 128,
         ],
         'apiPassword' => [
             'FriendlyName' => 'API Password',
             'Type' => 'text',
-            'Size' => 128
+            'Size' => 128,
         ],
         'apiSignature' => [
             'FriendlyName' => 'API Signature',
             'Type' => 'text',
-            'Size' => 128
+            'Size' => 128,
+        ],
+        'enableCronStatusCheck' => [
+            'FriendlyName' => 'Enable Cron Status Check',
+            'Description' => 'Enable validating all active billing agreements are still active during nightly cron job',
+            'Type' => 'yesno',
         ]
     ];
 }

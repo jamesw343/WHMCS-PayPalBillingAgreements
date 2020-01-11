@@ -114,3 +114,34 @@ foreach ($invoices as $invoice) {
         'paypalbilling'
     );
 }
+
+$statusCheck = @Capsule::table('tblpaymentgateways')
+    ->where('gateway', '=', 'paypalbilling')
+    ->where('setting', '=', 'enableCronStatusCheck')
+    ->first()
+    ->value;
+
+if ($statusCheck === 'on') {
+    $activeAgreements = Capsule::table('paypal_billingagreement')
+        ->where('status', '=', 'Active')
+        ->get();
+
+    foreach ($activeAgreements as $activeAgreement) {
+        $response = (new PayPalNVP())
+            ->addPair('REFERENCEID', $activeAgreement->id)
+            ->execute('BillAgreementUpdate');
+
+        if (!$response['success']) {
+            continue;
+        }
+
+        // PayPal error code 10201: Billing Agreement was cancelled
+        if (isset($response['response']['L_ERRORCODE0']) && $response['response']['L_ERRORCODE0'] === '10201') {
+            Capsule::table('paypal_billingagreement')
+                ->where('id', '=', $activeAgreement->id)
+                ->update(['status' => 'Cancelled']);
+
+            logActivity("Marked billing agreement #{$activeAgreement->id} as Cancelled due to cron check");
+        }
+    }
+}
