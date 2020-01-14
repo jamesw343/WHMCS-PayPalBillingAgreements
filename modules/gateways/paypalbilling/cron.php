@@ -32,7 +32,7 @@ $retryWeeks = intval($whmcs->get_config('CCRetryEveryWeekFor'));
 
 foreach ($invoices as $invoice) {
     if ($retryWeeks > 0 && time() > strtotime("+{$retryWeeks} weeks", strtotime($invoice->duedate)) && $invoice->last_capture_attempt != '0000-00-00 00:00:00') {
-        logActivity("PayPal Billing Agreements: Invoice #{$invoice->id} due over {$retryWeeks} week(s) ago, skipping.");
+        logActivity("PayPal Billing Agreements: Invoice ID: {$invoice->id} due over {$retryWeeks} week(s) ago, skipping");
         continue;
     }
 
@@ -44,7 +44,7 @@ foreach ($invoices as $invoice) {
         ->count();
 
     if ($massPayment > 0) {
-        logActivity("PayPal Billing Agreements: Invoice #{$invoice->id} is a Mass Pay invoice, skipping.");
+        logActivity("PayPal Billing Agreements: Invoice ID: {$invoice->id} is a Mass Pay invoice, skipping");
         continue;
     }
 
@@ -56,7 +56,7 @@ foreach ($invoices as $invoice) {
         ->first();
 
     if (!$billingAgreement) {
-        logActivity("PayPal Billing Agreements: Client #{$clientId} does not have an active PayPal Billing Agreement to pay Invoice #{$invoice->id}, skipping.");
+        logActivity("PayPal Billing Agreements: User ID: {$clientId} does not have an active PayPal Billing Agreement to pay Invoice ID: {$invoice->id}, skipping");
         continue;
     }
 
@@ -66,7 +66,7 @@ foreach ($invoices as $invoice) {
         ->disableautocc;
 
     if ($disableAutoCCProcessing) {
-        logActivity("PayPal Billing Agreements: Client #{$clientId} has auto-cc processing disabled for Invoice #{$invoice->id}, skipping.");
+        logActivity("PayPal Billing Agreements: User ID: {$clientId} has auto-cc processing disabled for Invoice ID: {$invoice->id}, skipping");
         continue;
     }
 
@@ -82,7 +82,7 @@ foreach ($invoices as $invoice) {
     }
 
     if ($balance <= 0) {
-        logActivity("PayPal Billing Agreements: Invoice #{$invoice->id} has a zero-balance, skipping.");
+        logActivity("PayPal Billing Agreements: Invoice ID: {$invoice->id} has a zero-balance, skipping");
         continue;
     }
 
@@ -101,11 +101,12 @@ foreach ($invoices as $invoice) {
 
     if (!$response || !$response['success'] || $response['response']['ACK'] !== 'Success' || !$response['response']['TRANSACTIONID']) {
         logTransaction('paypalbilling', $response, 'error');
-        logActivity("PayPal Billing Agreements: Unable to charge Invoice #{$invoice->id}");
+        logActivity("PayPal Billing Agreements: Unable to charge Invoice ID: {$invoice->id}");
         continue;
     }
 
     logTransaction('paypalbilling', $response, 'success');
+    logActivity("PayPal Billing Agreements: Successfully charged Invoice ID: {$invoice->id}");
     addInvoicePayment(
         $invoice->id,
         $response['response']['TRANSACTIONID'],
