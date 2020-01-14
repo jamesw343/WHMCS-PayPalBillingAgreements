@@ -48,6 +48,18 @@ foreach ($invoices as $invoice) {
         continue;
     }
 
+    // Don't automatically charge Add Funds invoices
+
+    $addFunds = Capsule::table('tblinvoiceitems')
+        ->where('invoiceid', '=', $invoice->id)
+        ->where('type', '=', 'AddFunds')
+        ->count();
+
+    if ($addFunds > 0) {
+        logActivity("PayPal Billing Agreements: Invoice ID: {$invoice->id} is an Add Funds invoice, skipping");
+        continue;
+    }
+
     $clientId = intval($invoice->userid);
 
     $billingAgreement = Capsule::table('paypal_billingagreement')
