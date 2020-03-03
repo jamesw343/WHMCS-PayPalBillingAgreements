@@ -54,3 +54,16 @@ add_hook('AdminAreaClientSummaryPage', 10, function($vars) {
 
     return $output;
 });
+
+add_hook('ClientAreaPrimarySidebar', 1, function(MenuItem $primarySidebar)
+{
+
+   $filename = APP::getCurrentFileName();
+   $action = $_GET['action'];
+
+
+   if ($filename=='paypalbilling' && $action=='manage' && !is_null($primarySidebar->getChild('My Invoices Status Filter'))) {
+                   $primarySidebar->removeChild('My Invoices Status Filter');
+       }
+
+});
