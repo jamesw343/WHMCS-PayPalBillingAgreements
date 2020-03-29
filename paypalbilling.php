@@ -14,14 +14,16 @@ $ca = new ClientArea();
 
 $ca->setPageTitle('PayPal Billing');
 $ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
+$ca->addToBreadCrumb('clientarea.php', Lang::trans("clientareatitle"));
+$ca->addToBreadCrumb(routePath("account-index"), Lang::trans("clientareanavdetails"));
 $ca->addToBreadCrumb('paypalbilling.php', 'PayPal Billing');
 
 $ca->initPage();
 
 $ca->requireLogin();
 
-Menu::primarySidebar('invoiceList');
-Menu::secondarySidebar('invoiceList');
+Menu::primarySidebar('clientView');
+Menu::secondarySidebar('clientView');
 
 $action = strtolower(@$_GET['action']);
 $action = preg_replace('/[^a-z]/', '', $action);
