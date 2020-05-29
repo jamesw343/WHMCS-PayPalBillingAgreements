@@ -9,6 +9,7 @@ require __DIR__ . '/init.php';
 require __DIR__ . '/modules/gateways/paypalbilling/PayPalNVP.php';
 require __DIR__ . '/includes/invoicefunctions.php';
 require __DIR__ . '/includes/gatewayfunctions.php';
+require __DIR__ . '/includes/clientfunctions.php';
 
 $ca = new ClientArea();
 
@@ -32,6 +33,8 @@ $whmcs = DI::make('app');
 $systemUrl = trim($whmcs->get_config('SystemURL'), '/');
 
 $ca->assign('systemUrl', $systemUrl);
+
+checkContactPermission('invoices');
 
 switch ($action) {
 
