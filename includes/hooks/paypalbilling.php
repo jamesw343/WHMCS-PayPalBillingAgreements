@@ -49,7 +49,7 @@ add_hook('AdminAreaClientSummaryPage', 10, function($vars)
         $output .= '<strong class="textred">No active PayPal Billing Agreements found.</strong>';
     }
 
-    $output .= '</div>';
+    $output .= '</div><br>';
 
     return $output;
 });
