@@ -1,7 +1,8 @@
 {if !$submitPayment}
     <p>Creating a PayPal Billing Agreement will allow us to automatically charge your PayPal account for one-time and recurring invoices.</p>
-    <p><strong>All invoices set to use PayPal Billing Agreements will be automatically charged 3 days in advance of the due date.</strong></p>
-
+    {if !$disableAutoCC}
+        <p><strong>All invoices set to use PayPal Billing Agreements will be automatically charged {$processDays} days in advance of the due date.</strong></p>
+    {/if}
     <hr />
 {/if}
 
@@ -47,7 +48,20 @@
     {else}
         {if $billingAgreement}
             <p>You currently have an active billing agreement.</p>
+            <br />
             <p><strong>Billing Agreement ID:</strong> {$billingAgreement->id}</p>
+            {if $billingAgreement->acc_first_name}
+                <p>
+                    <strong>PayPal Name:</strong>
+                    {$billingAgreement->acc_first_name} {$billingAgreement->acc_last_name}
+                    {if $billingAgreement->acc_business}
+                        ({$billingAgreement->acc_business})
+                    {/if}
+                </p>
+            {/if}
+            {if $billingAgreement->acc_email}
+                <p><strong>PayPal Email:</strong> {$billingAgreement->acc_email}</p>
+            {/if}
             <p><strong>Created On:</strong> {$billingAgreementDate}</p>
 
             <br />

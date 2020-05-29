@@ -111,7 +111,10 @@ switch ($action) {
         if ($result['success'] && @$result['response']['ACK'] == 'Success') {
             Capsule::table('paypal_billingagreement')
                 ->where('id', '=', $agreement->id)
-                ->update(['status' => 'Cancelled']);
+                ->update([
+                    'status' => 'Cancelled',
+                    'updated_at' => time(),
+                ]);
 
             if (!$noredirect) {
                 header("Location: {$systemUrl}/paypalbilling.php");
@@ -145,10 +148,21 @@ switch ($action) {
             ->execute('CreateBillingAgreement');
 
         if ($result['success'] && @$result['response']['ACK'] == 'Success' && @$result['response']['BILLINGAGREEMENTID']) {
+            $status = (new PayPalNVP())
+                ->addPair('REFERENCEID', $result['response']['BILLINGAGREEMENTID'])
+                ->execute('BillAgreementUpdate');
+
             Capsule::table('paypal_billingagreement')
                 ->insert([
                     'id' => $result['response']['BILLINGAGREEMENTID'],
                     'client_id' => $ca->getUserId(),
+                    'acc_email' => @$status['response']['EMAIL'],
+                    'acc_payer_id' => @$status['response']['PAYERID'],
+                    'acc_payer_status' => @$status['response']['PAYERSTATUS'],
+                    'acc_first_name' => @$status['response']['FIRSTNAME'],
+                    'acc_last_name' => @$status['response']['LASTNAME'],
+                    'acc_business' => @$status['response']['BUSINESS'],
+                    'acc_country_code' => @$status['response']['COUNTRYCODE'],
                     'status' => 'Active',
                     'created_at' => strtotime($result['response']['TIMESTAMP'])
                 ]);
@@ -277,9 +291,15 @@ switch ($action) {
             $ca->assign('invoiceid', intval($_GET['invoiceid']));
         }
 
+        $disableAutoCC = @Capsule::table('tblclients')
+            ->where('id', '=', $ca->getUserId())
+            ->first()->disableautocc;
+
         $ca->assign('billingAgreement', $agreement);
         $ca->assign('billingAgreementDate', date('m/d/Y', @$agreement->created_at));
         $ca->assign('action', $action);
+        $ca->assign('processDays', \WHMCS\Config\Setting::getValue('CCProcessDaysBefore'));
+        $ca->assign('disableAutoCC', $disableAutoCC);
         $ca->setTemplate('paypalbilling');
 
         break;

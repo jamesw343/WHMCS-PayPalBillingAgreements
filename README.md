@@ -19,8 +19,16 @@ For this addon to work correctly, you **must** have PayPal reference transaction
 CREATE TABLE `paypal_billingagreement` (
     `id` varchar(32) NOT NULL,
     `client_id` int(10) NOT NULL,
+    `acc_email` varchar(127),
+    `acc_payer_id` varchar(17),
+    `acc_payer_status` varchar(10),
+    `acc_first_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci,
+    `acc_last_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci,
+    `acc_business` varchar(127) CHARACTER SET utf8 COLLATE utf8_general_ci,
+    `acc_country_code` varchar(2),
     `status` varchar(32) NOT NULL,
     `created_at` int(10) NOT NULL,
+    `updated_at` int(10),
     PRIMARY KEY (`id`),
     FOREIGN KEY (`client_id`) REFERENCES `tblclients` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -30,6 +38,19 @@ CREATE TABLE `paypal_billingagreement` (
 6. *(Optional)* Set your IPN URL to `https://your.site/modules/gateways/callback/paypalbilling.php`. If you don't setup your IPN URL, consider enabling "Enable Cron Status Check" under the payment gateways module options. *(Warning: Running the cron status check with many active billing agreements may significantly extend the runtime of the cron job)*
 7. Run a cron job at 11:00 PM every night:
 `0 23 * * php -q /path/to/whmcs/modules/gateways/paypalbilling/cron.php`
+
+### Upgrade
+If you installed this addon prior to May 29th, 2020, run the following SQL statements to update the database schema.
+```sql
+ALTER TABLE `paypal_billingagreement` ADD COLUMN `acc_country_code` varchar(2) AFTER `client_id`;
+ALTER TABLE `paypal_billingagreement` ADD COLUMN `acc_business` varchar(127) CHARACTER SET utf8 COLLATE utf8_general_ci AFTER `client_id`;
+ALTER TABLE `paypal_billingagreement` ADD COLUMN `acc_last_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci AFTER `client_id`;
+ALTER TABLE `paypal_billingagreement` ADD COLUMN `acc_first_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci AFTER `client_id`;
+ALTER TABLE `paypal_billingagreement` ADD COLUMN `acc_payer_status` varchar(10) AFTER `client_id`;
+ALTER TABLE `paypal_billingagreement` ADD COLUMN `acc_payer_id` varchar(17) AFTER `client_id`;
+ALTER TABLE `paypal_billingagreement` ADD COLUMN `acc_email` varchar(127) AFTER `client_id`;
+ALTER TABLE `paypal_billingagreement` ADD COLUMN `updated_at` int(10) AFTER `created_at`;
+```
 
 ### Limitations
 - Currently designed to make auto-payments on a separate cron job. It's best to run this cron job at a separate time from your normal WHMCS daily cron to avoid conflicts.

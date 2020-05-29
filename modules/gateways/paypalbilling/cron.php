@@ -152,9 +152,25 @@ if ($statusCheck === 'on') {
         if (isset($response['response']['L_ERRORCODE0']) && $response['response']['L_ERRORCODE0'] === '10201') {
             Capsule::table('paypal_billingagreement')
                 ->where('id', '=', $activeAgreement->id)
-                ->update(['status' => 'Cancelled']);
+                ->update([
+                    'status' => 'Cancelled',
+                    'updated_at' => time(),
+                ]);
 
             logActivity("Marked billing agreement #{$activeAgreement->id} as Cancelled due to cron check");
+        } else {
+            Capsule::table('paypal_billingagreement')
+                ->where('id', '=', $activeAgreement->id)
+                ->update([
+                    'acc_email' => @$response['response']['EMAIL'],
+                    'acc_payer_id' => @$response['response']['PAYERID'],
+                    'acc_payer_status' => @$response['response']['PAYERSTATUS'],
+                    'acc_first_name' => @$response['response']['FIRSTNAME'],
+                    'acc_last_name' => @$response['response']['LASTNAME'],
+                    'acc_business' => @$response['response']['BUSINESS'],
+                    'acc_country_code' => @$response['response']['COUNTRYCODE'],
+                    'updated_at' => time(),
+                ]);
         }
     }
 }
