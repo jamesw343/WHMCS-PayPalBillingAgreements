@@ -108,7 +108,7 @@ switch ($action) {
 
         $noredirect = isset($_POST['noredirect']);
 
-        if ($result['success'] && @$result['response']['ACK'] == 'Success') {
+        if ($result['success'] && (@$result['response']['ACK'] == 'Success' || (@$result['response']['L_ERRORCODE0'] == '10201'))) {
             Capsule::table('paypal_billingagreement')
                 ->where('id', '=', $agreement->id)
                 ->update([
