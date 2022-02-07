@@ -72,12 +72,16 @@ foreach ($invoices as $invoice) {
         continue;
     }
 
-    $disableAutoCCProcessing = @Capsule::table('tblclients')
+    $client = Capsule::table('tblclients')
         ->where('id', '=', $clientId)
-        ->first()
-        ->disableautocc;
+        ->first();
 
-    if ($disableAutoCCProcessing) {
+    if (!$client) {
+        logActivity("PayPal Billing Agreements: User ID: {$clientId} was not found.");
+        continue;
+    }
+
+    if ($client->disableautocc) {
         logActivity("PayPal Billing Agreements: User ID: {$clientId} has auto-cc processing disabled for Invoice ID: {$invoice->id}, skipping");
         continue;
     }
@@ -98,14 +102,45 @@ foreach ($invoices as $invoice) {
         continue;
     }
 
-    $response = (new PayPalNVP())
+    $builder = (new PayPalNVP())
         ->addPair('AMT', $balance)
         ->addPair('CURRENCYCODE', 'USD')
         ->addPair('PAYMENTACTION', 'Sale')
         ->addPair('DESC', $whmcs->get_config('CompanyName') . ' Invoice #' . $invoice->id)
         ->addPair('REFERENCEID', $billingAgreement->id)
         ->addPair('NOTIFYURL', $whmcs->get_config('SystemURL') . '/modules/gateways/callback/paypalbilling.php')
-        ->execute('DoReferenceTransaction');
+        ->addPair('INVNUM', $invoice->id);
+
+    if ($client->address1) {
+        $builder->addPair('SHIPTONAME', "{$client->firstname} {$client->lastname}")
+            ->addPair('SHIPTOSTREET', $client->address1);
+
+        if ($client->address2) {
+            $builder->addPair('SHIPTOSTREET2', $client->address2);
+        }
+
+        if ($client->city) {
+            $builder->addPair('SHIPTOCITY', $client->city);
+        }
+
+        if ($client->state) {
+            $builder->addPair('SHIPTOSTATE', $client->state);
+        }
+
+        if ($client->postcode) {
+            $builder->addPair('SHIPTOZIP', $client->postcode);
+        }
+
+        if ($client->country) {
+            $builder->addPair('SHIPTOCOUNTRY', $client->country);
+        }
+
+        if ($client->phonenumber) {
+            $builder->addPair('SHIPTOPHONENUM', $client->phonenumber);
+        }
+    }
+
+    $response = $builder->execute('DoReferenceTransaction');
 
     Capsule::table('tblinvoices')
         ->where('id', '=', $invoice->id)

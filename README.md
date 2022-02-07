@@ -56,6 +56,5 @@ ALTER TABLE `paypal_billingagreement` ADD COLUMN `updated_at` int(10) AFTER `cre
 - Currently designed to make auto-payments on a separate cron job. It's best to run this cron job at a separate time from your normal WHMCS daily cron to avoid conflicts.
 - Does not support e-checks (or rather, the addon will mark the invoice as PAID instantly regardless of whether the e-check clears). Recommended to disable accepting e-checks on your PayPal account to avoid this.
 - Does not currently email a user when a PayPal billing agreement charge attempt fails
-- Does not have support for shipping addresses when submitting a payment, making you ineligible for PayPal seller protection
 - No auto-installation
-- No ability to manage a customer's billing agreement settings through the admin area
+- No ability to manage a customer's billing agreement settings through the admin area (either login as client or go to paypal.com to cancel existing subscriptions)

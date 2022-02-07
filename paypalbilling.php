@@ -36,6 +36,14 @@ $ca->assign('systemUrl', $systemUrl);
 
 checkContactPermission('invoices');
 
+$client = Capsule::table('tblclients')
+    ->where('id', '=', $ca->getUserId())
+    ->first();
+
+if (!$client) {
+    die('Error loading client information');
+}
+
 switch ($action) {
 
     case 'create':
@@ -238,7 +246,7 @@ switch ($action) {
             break;
         }
 
-        $response = (new PayPalNVP())
+        $builder = (new PayPalNVP())
             ->addPair('AMT', $balance)
             ->addPair('CURRENCYCODE', 'USD')
             ->addPair('PAYMENTACTION', 'Sale')
@@ -246,7 +254,38 @@ switch ($action) {
             ->addPair('REFERENCEID', $agreement->id)
             ->addPair('NOTIFYURL', $whmcs->get_config('SystemURL') . '/modules/gateways/callback/paypalbilling.php')
             ->addPair('IPADDRESS', $_SERVER['REMOTE_ADDR'])
-            ->execute('DoReferenceTransaction');
+            ->addPair('INVNUM', $invoice->id);
+
+        if ($client->address1) {
+            $builder->addPair('SHIPTONAME', "{$client->firstname} {$client->lastname}")
+                ->addPair('SHIPTOSTREET', $client->address1);
+
+            if ($client->address2) {
+                $builder->addPair('SHIPTOSTREET2', $client->address2);
+            }
+
+            if ($client->city) {
+                $builder->addPair('SHIPTOCITY', $client->city);
+            }
+
+            if ($client->state) {
+                $builder->addPair('SHIPTOSTATE', $client->state);
+            }
+
+            if ($client->postcode) {
+                $builder->addPair('SHIPTOZIP', $client->postcode);
+            }
+
+            if ($client->country) {
+                $builder->addPair('SHIPTOCOUNTRY', $client->country);
+            }
+
+            if ($client->phonenumber) {
+                $builder->addPair('SHIPTOPHONENUM', $client->phonenumber);
+            }
+        }
+
+        $response = $builder->execute('DoReferenceTransaction');
 
         Capsule::table('tblinvoices')
             ->where('id', '=', $invoice->id)
@@ -291,15 +330,11 @@ switch ($action) {
             $ca->assign('invoiceid', intval($_GET['invoiceid']));
         }
 
-        $disableAutoCC = @Capsule::table('tblclients')
-            ->where('id', '=', $ca->getUserId())
-            ->first()->disableautocc;
-
         $ca->assign('billingAgreement', $agreement);
         $ca->assign('billingAgreementDate', date('m/d/Y', @$agreement->created_at));
         $ca->assign('action', $action);
         $ca->assign('processDays', \WHMCS\Config\Setting::getValue('CCProcessDaysBefore'));
-        $ca->assign('disableAutoCC', $disableAutoCC);
+        $ca->assign('disableAutoCC', $client->disableautocc);
         $ca->setTemplate('paypalbilling');
 
         break;
