@@ -149,6 +149,11 @@ foreach ($invoices as $invoice) {
     if (!$response || !$response['success'] || $response['response']['ACK'] !== 'Success' || !$response['response']['TRANSACTIONID']) {
         logTransaction('paypalbilling', $response, 'error');
         logActivity("PayPal Billing Agreements: Unable to charge Invoice ID: {$invoice->id}");
+        try {
+            sendMessage("PayPal Billing Agreement Payment Failed", $invoice->id);
+        } catch (Exception $e) {
+            logActivity("PayPal Billing Agreements: Unable to send payment failed email. Make sure template exists!");
+        }
         continue;
     }
 

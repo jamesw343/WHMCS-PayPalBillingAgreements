@@ -33,10 +33,18 @@ CREATE TABLE `paypal_billingagreement` (
     FOREIGN KEY (`client_id`) REFERENCES `tblclients` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 ```
-4. Activate the module in WHMCS Admin => Payment Gateways
-5. Enter your PayPal API Username, Password, and Signature in WHMCS Admin => Payment Gateways => PayPal Billing Agreement
+4. Activate the module in Setup => Payments => Payment Gateways
+5. Enter your PayPal API Username, Password, and Signature in Setup => Payments => Payment Gateways => Manage Existing Gateways => PayPal Billing Agreement
 6. *(Optional)* Set your IPN URL to `https://your.site/modules/gateways/callback/paypalbilling.php`. If you don't setup your IPN URL, consider enabling "Enable Cron Status Check" under the payment gateways module options. *(Warning: Running the cron status check with many active billing agreements may significantly extend the runtime of the cron job)*
-7. Run a cron job at 11:00 PM every night:
+7. Create a custom email template under Setup => Email Templates. Make sure the `Email Type` is set to `Invoice` and the `Unique Name` is `PayPal Billing Agreement Payment Failed`. You may use the following as a starter template:
+```html
+<p>Dear {$client_name},</p>
+<p>This is a notice that a recent PayPal Billing Agreement payment we attempted on your PayPal account failed.</p>
+<p>Invoice Date: {$invoice_date_created}<br />Invoice No: {$invoice_num}<br />Amount: {$invoice_total}<br />Status: {$invoice_status}</p>
+<p>You will need to login to our client area to pay the invoice manually at {$invoice_link}</p>
+<p>{$signature}</p>
+```
+8. Run a cron job at 11:00 PM every night:
 `0 23 * * php -q /path/to/whmcs/modules/gateways/paypalbilling/cron.php`
 
 ### Upgrade
@@ -55,6 +63,5 @@ ALTER TABLE `paypal_billingagreement` ADD COLUMN `updated_at` int(10) AFTER `cre
 ### Limitations
 - Currently designed to make auto-payments on a separate cron job. It's best to run this cron job at a separate time from your normal WHMCS daily cron to avoid conflicts.
 - Does not support e-checks (or rather, the addon will mark the invoice as PAID instantly regardless of whether the e-check clears). Recommended to disable accepting e-checks on your PayPal account to avoid this.
-- Does not currently email a user when a PayPal billing agreement charge attempt fails
 - No auto-installation
 - No ability to manage a customer's billing agreement settings through the admin area (either login as client or go to paypal.com to cancel existing subscriptions)
