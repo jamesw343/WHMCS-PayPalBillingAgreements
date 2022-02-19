@@ -65,3 +65,4 @@ ALTER TABLE `paypal_billingagreement` ADD COLUMN `updated_at` int(10) AFTER `cre
 - Does not support e-checks (or rather, the addon will mark the invoice as PAID instantly regardless of whether the e-check clears). Recommended to disable accepting e-checks on your PayPal account to avoid this.
 - No auto-installation
 - No ability to manage a customer's billing agreement settings through the admin area (either login as client or go to paypal.com to cancel existing subscriptions)
+- WHMCS v8 Users: This gateway has not been thoroughly tested with WHMCS v8 yet. From preliminary reports, you may need to manually edit the file `/path/to/whmcs/modules/gateways/paypalbilling/PayPalNVP.php` with your PayPal API credentials as WHMCS might store them differently.
